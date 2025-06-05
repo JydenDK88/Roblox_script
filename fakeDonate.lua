@@ -1,63 +1,65 @@
--- FAKE DONATION SCRIPT - Kun til testmiljøer du selv ejer!
+-- PLS Donate Fake Donation Script (lokalt)
+-- Brug i din egen version af PLS Donate (til test og sjov)
 
-local plr = game.Players.LocalPlayer
-local char = plr.Character or plr.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local name = lp.DisplayName or lp.Name
 
--- Find spillerens stand i workspace
+-- Find din stand i workspace (original struktur)
 local function getBooth()
-    for _, model in pairs(workspace:GetDescendants()) do
-        if model:IsA("Model") and model:FindFirstChild("Owner") then
-            if model.Owner:IsA("ObjectValue") and model.Owner.Value == plr then
-                return model
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChild("Owner") then
+            if v.Owner:IsA("ObjectValue") and v.Owner.Value == lp then
+                return v
             end
         end
     end
-    return nil
 end
 
 local booth = getBooth()
-
 if not booth then
-    warn("❌ Din stand blev ikke fundet!")
+    warn("❌ Kunne ikke finde din stand.")
     return
 end
 
--- Find tekstobjekt i standen
-local function findTextLabel(model)
-    for _, v in pairs(model:GetDescendants()) do
-        if v:IsA("TextLabel") then
-            return v
-        end
+-- Find tekstfeltet (i PLS Donate hedder det ofte SurfaceGui > TextLabel)
+local textLabel
+for _, v in ipairs(booth:GetDescendants()) do
+    if v:IsA("TextLabel") and v.Text:find("R$") then
+        textLabel = v
+        break
     end
-    return nil
 end
-
-local textLabel = findTextLabel(booth)
 
 if textLabel then
-    textLabel.Text = "🔥 " .. plr.DisplayName .. " fik 999,999 R$ DONATION! 🔥"
-    textLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+    textLabel.Text = name .. " har lige modtaget 10,000 R$!! 💸"
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    textLabel.TextStrokeTransparency = 0.2
     textLabel.TextScaled = true
-    textLabel.TextStrokeTransparency = 0
 else
-    warn("❌ Tekst kunne ikke findes i standen!")
+    warn("❌ Kunne ikke finde tekstLabel i standen.")
 end
 
--- Lav en fed visuel effekt
+-- Lav en visuel effekt for "donation"
+local char = lp.Character or lp.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
 local part = Instance.new("Part", workspace)
-part.Size = Vector3.new(5,1,5)
-part.Position = hrp.Position + Vector3.new(0,5,0)
 part.Anchored = true
+part.CanCollide = false
+part.Size = Vector3.new(5, 1, 5)
+part.Position = hrp.Position + Vector3.new(0, 6, 0)
 part.Material = Enum.Material.Neon
 part.BrickColor = BrickColor.new("Bright yellow")
+part.Transparency = 0.2
 
-local emitter = Instance.new("ParticleEmitter", part)
-emitter.Texture = "rbxassetid://284205403" -- Robux-mønt
-emitter.Rate = 100
-emitter.Lifetime = NumberRange.new(1.5)
-emitter.Speed = NumberRange.new(2,5)
-emitter.SpreadAngle = Vector2.new(360, 360)
+local particle = Instance.new("ParticleEmitter", part)
+particle.Texture = "rbxassetid://284205403"
+particle.Rate = 100
+particle.Lifetime = NumberRange.new(1)
+particle.Speed = NumberRange.new(2, 5)
+particle.VelocitySpread = 180
+
 game:GetService("Debris"):AddItem(part, 3)
 
-print("✅ Fake donation vist.")
+print("✅ Fake donation gennemført.")
